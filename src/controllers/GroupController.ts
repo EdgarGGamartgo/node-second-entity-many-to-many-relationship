@@ -5,33 +5,19 @@ import { Group } from './../models/Group'
 
 const router = express.Router()
 
-router.get('/api/users/:mode',
-    [
-        param('mode')
-            .trim()
-    ],
-    validateRequest,
-    async (req: Request, res: Response) => {
+
+router.post('/api/group', [
+],
+    validateRequest, async (req: Request, res: Response) => {
         try {
-            await Group.findAll()
+
+            await Group.create(req.body)
+            res.status(201).send(req.body)
         } catch (e) {
             console.log(e)
-            throw new BadRequestError('')
+            throw new BadRequestError('Group could not get created!')
         }
     })
 
-    router.post('/api/group', [
-    ],
-        validateRequest, async (req: Request, res: Response) => {
-            try {
-
-                await Group.create(req.body)
-                res.status(201).send(req.body)
-            } catch (e) {
-                console.log(e)
-                throw new BadRequestError('Group could not get created!')
-            }
-        })
-    
 
 export { router as GroupController }
