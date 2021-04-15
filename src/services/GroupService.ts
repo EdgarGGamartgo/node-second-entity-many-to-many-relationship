@@ -1,5 +1,6 @@
 import { Group } from './../models'
 import { GroupAttrs } from './../types'
+import { v4 as uuidv4 } from 'uuid';
 
 export const deleteGroupById = async (id: string) => {
     return await Group.destroy({
@@ -27,4 +28,4 @@ export const findGroupById = async(id: string) => {
 
 export const findAllGroups = async () => await Group.findAll()
 
-export const createGroup = async (group: GroupAttrs) => await Group.create(group)
+export const createGroup = async (group: GroupAttrs) => await Group.create({...group, id: uuidv4()})

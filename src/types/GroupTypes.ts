@@ -1,7 +1,7 @@
 import { BuildOptions, Model } from "sequelize";
 
 export interface GroupAttrs {
-    id?: number;
+    id?: string;
     name: string;
     permission: string[];
     // createdAt?: Date;

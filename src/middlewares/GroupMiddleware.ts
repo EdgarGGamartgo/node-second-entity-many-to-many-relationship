@@ -22,15 +22,15 @@ export const postValidation = [
 export const getByIdValidation = [
     param('id')
         .notEmpty()
-        .isNumeric()
+        .isString()
         .withMessage('id must be numeric')
 ]
 
 export const putValidation = [
     body('id')
         .notEmpty()
-        .isNumeric()
-        .withMessage('id must be a numeric'),
+        .isString()
+        .withMessage('id must be a string'),
     body('name')
         .isString()
         .notEmpty()
@@ -43,8 +43,8 @@ export const putValidation = [
 ]
 
 export const deleteValidation = [
-    body('id')
-    .notEmpty()
-    .isNumeric()
-    .withMessage('id must be a numeric')
+    param('id')
+      .notEmpty()
+      .isString()
+      .withMessage('id must be a string')
 ]

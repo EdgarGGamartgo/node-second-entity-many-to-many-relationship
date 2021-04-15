@@ -1,50 +1,52 @@
 import express, { Request, Response } from 'express'
-import { body, param } from 'express-validator'
 import { BadRequestError, validateRequest } from '@oregtickets/common'
-import { User } from './../models/User'
-import { isDate } from './../services/isDate'
+import { 
+    getAllUsersByIsDelete,
+    getAllUsers,
+    getUserById,
+    createUser,
+    updateUser,
+    deleteUser,
+    addUsersToGroup,
+ } from './../services'
+import {
+    getAllValidation,
+    getUserByIdValidation,
+    createUserValidation,
+    updateUserValidation,
+    deleteUserValidation,
+    usersToGroupCreateValidation,
+} from './../middlewares'
 
 const router = express.Router()
 
+router.post('/api/add-users-to-group',
+    usersToGroupCreateValidation,
+    validateRequest, async(req: Request, res: Response) => {
+    try {
+        const { groupId, userIds } = req.body
+        const usersToGroup = await addUsersToGroup(groupId, userIds)
+        res.status(201).send(usersToGroup)
+    } catch (e) {
+        console.log(e)
+        throw new BadRequestError('Cant add users to group!!')
+    }
+})
+
 router.get('/api/users/:mode',
-    [
-        param('mode')
-            .trim()
-            .notEmpty()
-            .isString()
-            .custom(mode => {
-                if (mode === 'true') {
-                    return true
-                } else if (mode === 'false') {
-                    return true
-                } else if (mode === 'all') {
-                    return true
-                } else {
-                    throw new BadRequestError('mode must be true, false or all')
-                }
-            })
-            .withMessage('You must supply a valid mode')
-    ],
+    getAllValidation,
     validateRequest,
     async (req: Request, res: Response) => {
         const { mode } = req.params;
         try {
             if (mode === 'true') {
-                const users = await User.findAll({
-                    where: {
-                        is_deleted: true
-                    }
-                })
+                const users = await getAllUsersByIsDelete(true)
                 res.status(200).send(users);
             } else if (mode === 'false') {
-                const users = await User.findAll({
-                    where: {
-                        is_deleted: false
-                    }
-                })
+                const users = await getAllUsersByIsDelete(false)
                 res.status(200).send(users);
             } else if (mode === 'all') {
-                const users = await User.findAll({})
+                const users = await getAllUsers()
                 res.status(200).send(users);
             }
         } catch (e) {
@@ -55,23 +57,12 @@ router.get('/api/users/:mode',
 
 
 router.get('/api/user/:id',
-    [
-        param('id')
-            .trim()
-            .notEmpty()
-            .isString()
-            .withMessage('You must supply a valid UUID')
-    ],
+    getUserByIdValidation,
     validateRequest,
     async (req: Request, res: Response) => {
         const { id } = req.params;
         try {
-            const user = await User.findOne({
-                where: {
-                    is_deleted: false,
-                    id: id
-                }
-            })
+            const user = await getUserById(id)
             res.status(200).send(user);
         } catch (e) {
             console.log(e)
@@ -80,41 +71,8 @@ router.get('/api/user/:id',
         
     })
 
-router.get('/api/user/auto-suggest', async (req: Request, res: Response) => {
-    res.status(200).send('auto-suggest')
-})
-
-router.post('/api/user', [
-    body('login')
-        .trim()
-        .notEmpty()
-        .isString()
-        .custom(date => {
-            if (isDate(date)) {
-                return true
-            } else {
-                throw new BadRequestError('login must be a valid date')
-            }
-        })
-        .withMessage('You must supply login'),
-    body('password')
-        .trim()
-        .notEmpty()
-        .isString()
-        .withMessage('You must supply a password'),
-    body('age')
-        .trim()
-        .notEmpty()
-        .isNumeric()
-        .custom(age => {
-            if (age >= 4 && age <= 130) {
-                return true
-            } else {
-                throw new BadRequestError('age must be between 4 and 130')
-            }
-        })
-        .withMessage('You must supply age')
-],
+router.post('/api/user', 
+    createUserValidation,
     validateRequest, async (req: Request, res: Response) => {
         const { login, password, age } = req.body;
         try {
@@ -124,59 +82,20 @@ router.post('/api/user', [
                 age: +age,
                 is_deleted: false
             }
-            await User.create(user)
-            res.status(201).send(user)
+            const createdUser = await createUser(user)
+            res.status(201).send(createdUser)
         } catch (e) {
             console.log(e)
             throw new BadRequestError('User could not get created!')
         }
     })
 
-router.put('/api/user', [
-    body('id')
-        .trim()
-        .notEmpty()
-        .isString()
-        .withMessage('You must supply an id'),
-    body('password')
-        .trim()
-        .notEmpty()
-        .isString()
-        .withMessage('You must supply a password'),
-    body('login')
-        .trim()
-        .notEmpty()
-        .isString()
-        .custom(date => {
-            if (isDate(date)) {
-                return true
-            } else {
-                throw new BadRequestError('login must be a valid date')
-            }
-        })
-        .withMessage('You must supply login'),
-    body('age')
-        .trim()
-        .notEmpty()
-        .isNumeric()
-        .custom(age => {
-            if (age >= 4 && age <= 130) {
-                return true
-            } else {
-                throw new BadRequestError('age must be between 4 and 130')
-            }
-        })
-        .withMessage('You must supply age')
-],
+router.put('/api/user',
+    updateUserValidation,
     validateRequest, async (req: Request, res: Response) => {
         const { id } = req.body;
         try {
-            const user = await User.update(req.body,{
-                where: {
-                    is_deleted: false,
-                    id: id
-                }
-            })            
+            const user = await updateUser(req.body, id)
             res.status(200).send(user);
         } catch (e) {
             console.log(e)
@@ -185,21 +104,11 @@ router.put('/api/user', [
     })
 
 router.delete('/api/user/:id',
-    [
-        param('id')
-            .trim()
-            .notEmpty()
-            .isString()
-            .withMessage('You must supply a valid UUID')
-    ], async (req: Request, res: Response) => {
+    deleteUserValidation
+    ,validateRequest, async (req: Request, res: Response) => {
         const { id } = req.params;
         try {
-            const user = await User.update({ is_deleted: true },{
-                where: {
-                    is_deleted: false,
-                    id: id
-                }
-            })
+            const user = await deleteUser(id)
             res.status(200).send(user);
         } catch (e) {
             console.log(e)

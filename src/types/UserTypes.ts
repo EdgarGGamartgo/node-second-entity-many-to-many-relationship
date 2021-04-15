@@ -1,7 +1,7 @@
 import { BuildOptions, Model } from "sequelize";
 
 export interface UserAttrs {
-    id?: number;
+    id?: string;
     login: string;
     password: string;
     age: number;

@@ -6,8 +6,8 @@ import { Permission } from './../enums/PermissionEnum'
 export function GroupFactory (sequelize: Sequelize): GroupStatic {
     return <GroupStatic>sequelize.define("group", {
         id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
+            type: DataTypes.STRING,
+            autoIncrement: false,
             primaryKey: true,
         },
         name: {

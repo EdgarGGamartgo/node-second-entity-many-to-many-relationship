@@ -5,19 +5,19 @@ import { db } from './../data-access/db-scripts'
 export function UserFactory (sequelize: Sequelize): UserStatic {
     return <UserStatic>sequelize.define("user", {
         id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
+            type: DataTypes.STRING,
+            autoIncrement: false,
             primaryKey: true,
         },
         login: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
+            unique: false,
         },
         password: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
+            unique: false,
         },
         age: {
             type: DataTypes.INTEGER,

@@ -69,14 +69,14 @@ router.put('/api/group',
         }
     })
 
-router.delete('/api/group/id:',
+router.delete('/api/group/:id',
     deleteValidation,
     validateRequest,
     async (req: Request, res: Response) => {
         try {
-            const { id } = req.body
+            const { id } = req.params
             const group = await deleteGroupById(id)
-            res.status(200).send(group)
+            return res.sendStatus(200).send(group)
         } catch (e) {
             console.log(e)
             throw new BadRequestError('could not delete Group!!!')
