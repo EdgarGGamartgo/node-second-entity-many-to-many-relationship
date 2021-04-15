@@ -2,10 +2,8 @@ import { BuildOptions, Model } from "sequelize";
 
 export interface GroupAttrs {
     id?: number;
-    login: string;
-    password: string;
-    age: number;
-    is_deleted: boolean;
+    name: string;
+    permission: string[];
     // createdAt?: Date;
     // updatedAt?: Date;
   }
